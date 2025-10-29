@@ -23,7 +23,7 @@
     "if-env": "^1.0.4",
     "moment": "^2.25.3",
     "mongoose": "^5.9.10",
-    "mysql2": "^2.1.0",
+    "mysql2": "^2.3.3",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "react": "^16.13.1",
@@ -35,7 +35,7 @@
     "react-scripts": "3.4.1",
     "reactjs-popup": "^1.5.0",
     "reactstrap": "^8.4.1",
-    "sequelize": "^5.21.7",
+    "sequelize": "^5.22.5",
     "sweetalert2": "^9.10.12"
   },
   "scripts": {
