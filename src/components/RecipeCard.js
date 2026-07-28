@@ -1,13 +1,10 @@
 import React, { Fragment, useState, useContext } from 'react';
 import { GlobalContext } from '../context/GlobalState';
-import axios from 'axios';
-// import MissingIngredient from './MissingIngredient';
 import RecipeContent from './RecipeContent';
 import RecipeContentPlaceholder from './RecipeContentPlaceholder';
 import Error from './Error';
 import Popup from 'reactjs-popup';
 import expand from './../images/expand.svg';
-import firebase from './firebase.js';
 
 
 const RecipeCard = ({ id, title, image, missingIngredients = null }) => {
@@ -17,43 +14,33 @@ const RecipeCard = ({ id, title, image, missingIngredients = null }) => {
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState({});
   const [error, setError] = useState(false);
-  const [item, setItem] = useState(false);
 
-  
-
-  const openPopup = async () => {
+  const openPopup = () => {
     setError(false);
     setLoading(true);
     setOpen(true);
-    try {
-      const recipeData = await axios.get(
-        `https://api.spoonacular.com/recipes/${id}/information?includeNutrition=false&apiKey=df52bffa937c4efc8c90dfe52995a72f`
-      );
-      setRecipe(recipeData.data);
-      setLoading(false);
-    } catch (err) {
-      setError(true);
-      setLoading(false);
-    }  
-
+    setRecipe({
+      id,
+      title,
+      image,
+      summary: `A simple recipe idea inspired by your available ingredients.`,
+      instructions: 'This is a fallback view while the original recipe service is unavailable.'
+    });
+    setLoading(false);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError(false);
     setLoading(true);
-    try {
-      const recipes = await axios.get(
-        `https://api.spoonacular.com/recipes/${id}/information?includeNutrition=false&apiKey=df52bffa937c4efc8c90dfe52995a72f`
-      );
-      console.log(recipes.data);
-      firebase.database().ref().child('savedRecipes').push(recipes.data);
-      setItem(recipes.data);
-      setLoading(false);
-    } catch (err) {
-      setError(true);
-      setLoading(false);
-    }
+    setRecipe({
+      id,
+      title,
+      image,
+      summary: 'Saved locally for now.',
+      instructions: 'Saving is currently simulated locally while the legacy backend is unavailable.'
+    });
+    setLoading(false);
   };
 
   const ingredientAdded = missingIngredients.filter((missingIngredient) => {

@@ -2,8 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import RecipesList from './RecipesList';
 import { GlobalContext } from '../context/GlobalState';
-import Inventory from "./Inventory";
-import firebase from './firebase.js';
+import { buildFallbackRecipes } from '../utils/recipeFallback';
 
 
 const Main = () => {
@@ -25,7 +24,6 @@ const Main = () => {
   );
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
   const { ingredients } = useContext(GlobalContext);
 
   var mergedIngredients = ingredients.map((ingredient) => {
@@ -34,52 +32,42 @@ const Main = () => {
 
   var encodedIngredients = mergedIngredients.join();
 
-  const callDatabase= (e) => {
-    // console.log(encodedIngredients)
-    axios.get('/profile').then((response) => {
-      if (response.data) {
-        let kitchenArr = [];
-        for(let i = 0; i < response.data.ingredients.length; i++){
-          let tempVar = response.data.ingredients[i].name.replace(' ','%20');
-          kitchenArr.push(tempVar);
-        }
-        kitchenArr = kitchenArr.join(',')
-        encodedIngredients = kitchenArr;
-      } else {
-        console.log("Profile not found, please log in")
-      }
+  const callDatabase = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setLoading(true);
 
-      fetchRecipes(e)
-    })
-  }
+    try {
+      const ingredientNames = ingredients.map((ingredient) => ingredient.value);
+      const fallbackRecipes = buildFallbackRecipes(ingredientNames);
+      setRecipes(fallbackRecipes);
+      setLoading(false);
+      setMessage('Showing local recipe suggestions while the old backend is unavailable.');
+    } catch (err) {
+      setLoading(false);
+      setMessage('We could not load recipe suggestions right now.');
+    }
+  };
 
   const fetchRecipes = async (e) => {
     e.preventDefault();
-    setError(false);
     setMessage('');
     setLoading(true);
-    try {
-      const recipes = await axios.get(
-        `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${encodedIngredients}&number=30&ranking=2&ignorePantry=false&apiKey=df52bffa937c4efc8c90dfe52995a72f`
-      );
-      console.log(recipes.data);
-      firebase.database().ref().child('recipes').push(recipes.data);
 
-      if (recipes.data.length === 0) {
-        setMessage(
-          "Darn! Can't find any recipes. Try adding more ingredients."
-        );
+    try {
+      const ingredientNames = ingredients.map((ingredient) => ingredient.value);
+      const fallbackRecipes = buildFallbackRecipes(ingredientNames);
+      setRecipes(fallbackRecipes);
+      setLoading(false);
+
+      if (fallbackRecipes.length === 0) {
+        setMessage("Darn! Can't find any recipes. Try adding more ingredients.");
       } else {
         setMessage('');
       }
-      setRecipes(recipes.data);
-      setLoading(false);
     } catch (err) {
-      setError(true);
-      setMessage(
-        "Darn! It appears we've hit our limit for requests for the day. Please try again tomorrow."
-      );
       setLoading(false);
+      setMessage('We could not load recipe suggestions right now.');
     }
   };
 

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import "./style.css";
 import Inventory from "./Inventory"
-import axios from "axios";
+import { GlobalContext } from '../context/GlobalState';
 
 class Kitchen extends Component{
+    static contextType = GlobalContext;
 
     state = { 
         ingredients_fridge: undefined, 
@@ -11,54 +12,33 @@ class Kitchen extends Component{
     };
 
     componentDidMount() {
-        axios.get('/profile').then((response) => {
-            if (response.data) {
-                let kitchenArr = [];
-                let pantryArr = [];
-                for(let i = 0; i < response.data.ingredients.length; i++){
-                    if(response.data.ingredients[i].fridge_bool === true){
-                        kitchenArr.push(response.data.ingredients[i]);
-                    } else {
-                        pantryArr.push(response.data.ingredients[i]);
-                    }
-                }
-                // console.log(response.data);
-                this.setState({ ingredients_fridge: kitchenArr, ingredients_pantry: pantryArr });
-                
-            }
-        })
+        this.updateIngredients();
     }
 
     updateIngredients = () => {
-        axios.get('/profile').then((response) => {
-            if (response.data) {
-                let kitchenArr = [];
-                let pantryArr = [];
-            for(let i = 0; i < response.data.ingredients.length; i++){
-                if(response.data.ingredients[i].fridge_bool === true){
-                    kitchenArr.push(response.data.ingredients[i]);
-                } else {
-                    pantryArr.push(response.data.ingredients[i]);
-                }
+        const ingredients = this.context.ingredients || [];
+        const kitchenArr = [];
+        const pantryArr = [];
+
+        for(let i = 0; i < ingredients.length; i++){
+            if(ingredients[i].fridge_bool === true){
+                kitchenArr.push(ingredients[i]);
+            } else {
+                pantryArr.push(ingredients[i]);
             }
-            // console.log(response.data);
-            this.setState({ ingredients_fridge: kitchenArr, ingredients_pantry: pantryArr });
-            }
-        })
+        }
+
+        this.setState({ ingredients_fridge: kitchenArr, ingredients_pantry: pantryArr });
     }
 
     removeIngredients = (id) => {
-        console.log(id)
-        axios.delete(`/api/ingredient/${id}`).then((response) => {
-            if (response.data) this.updateIngredients();
-        });
+        this.context.deleteIngredient(id);
+        this.updateIngredients();
     }
 
     deleteAmount = (id, quantity_to_delete) => {
-        console.log(id)
-        axios.put(`/api/ingredient/${id}`,{quantity: quantity_to_delete}).then((response) => {
-            if (response.data) this.updateIngredients();
-        });
+        this.context.updateIngredientQuantity(id, quantity_to_delete);
+        this.updateIngredients();
     }
 
     render(){

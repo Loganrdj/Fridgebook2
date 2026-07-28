@@ -34,12 +34,20 @@ export const GlobalProvider = ({ children }) => {
     });
   }
 
+  function updateIngredientQuantity(id, amount) {
+    dispatch({
+      type: 'UPDATE_INGREDIENT_QUANTITY',
+      payload: { id, amount }
+    });
+  }
+
   return (
     <GlobalContext.Provider
       value={{
         ingredients: state.ingredients,
         deleteIngredient,
-        addIngredient
+        addIngredient,
+        updateIngredientQuantity
       }}
     >
       {children}

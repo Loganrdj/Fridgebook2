@@ -1,34 +1,26 @@
 import React, { Component } from 'react';
 import "./style.css";
-import axios from "axios";
 import IngredientInput from './IngredientInput';
 import Notifications from './Notifications';
 import NotificationWrapper from './NotificationWrapper';
+import { GlobalContext } from '../context/GlobalState';
 
 class Dashboard extends Component {
+    static contextType = GlobalContext;
+
     state = { user_name: undefined, ingredients: undefined, login: false };
 
     componentDidMount() {
-        axios.get('/profile').then((response) => {
-            if (response.data) {
-                // console.log(response.data);
-                this.setState({ login: true, user_name: response.data.user_name, ingredients: response.data.ingredients });
-            } else {
-                this.setState({ login: false, user_name: undefined, ingredients: undefined });
-            }
-        })
+        this.setState({ login: true, user_name: 'Local User', ingredients: this.context.ingredients });
     }
 
     updateIngredients = () => {
-        axios.get('/profile').then((response) => {
-            if (response.data) this.setState({ ingredients: response.data.ingredients });
-        })
+        this.setState({ ingredients: this.context.ingredients });
     }
 
     removeIngredients = (id) => {
-        axios.delete(`/api/ingredient/${id}`).then((response) => {
-            if (response.data) this.updateIngredients();
-        });
+        this.context.deleteIngredient(id);
+        this.updateIngredients();
     }
 
     // onClickAlert = () => {
@@ -44,7 +36,7 @@ class Dashboard extends Component {
                         <div className="col-md-6">
                             {/* <div className="container"> */}
                                 <h2>Input your ingredients</h2>
-                                <IngredientInput afterSubmit={this.updateIngredients}></IngredientInput>  
+                                <IngredientInput afterSubmit={this.updateIngredients} addIngredient={this.context.addIngredient}></IngredientInput>  
                             {/* </div> */}
                         </div>
                         <div className="col-md-6">
