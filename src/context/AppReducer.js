@@ -12,6 +12,18 @@ export default (state, action) => {
         ...state,
         ingredients: [...state.ingredients, action.payload]
       };
+    case 'UPDATE_INGREDIENT_QUANTITY':
+      return {
+        ...state,
+        ingredients: state.ingredients.flatMap((ingredient) => {
+          if (ingredient.id !== action.payload.id) {
+            return [ingredient];
+          }
+
+          const updatedQuantity = Number(ingredient.quantity) - Number(action.payload.amount);
+          return updatedQuantity > 0 ? [{ ...ingredient, quantity: updatedQuantity }] : [];
+        })
+      };
     default:
       return state;
   }

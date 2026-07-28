@@ -39,12 +39,11 @@
     "sweetalert2": "^9.10.12"
   },
   "scripts": {
-    "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
-    "start:prod": "node server.js",
-    "start:dev": "concurrently \"node server.js\" \"react-scripts start\"",
+    "start": "react-scripts start",
+    "start:legacy": "node server.js",
     "client": "cd src && npm run start",
     "seed": "node scripts/seedDB.js",
-    "build": "npm run build",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "eslintConfig": {

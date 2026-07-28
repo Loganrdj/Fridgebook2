@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import "./style.css";
-import axios from 'axios';
 
 class IngredientInput extends Component {
     state = {
@@ -22,11 +21,22 @@ class IngredientInput extends Component {
     submitIngredient = (event) => {
         event.preventDefault();
         let t = new Date();
-        this.setState({ date_start: `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}` }, () => {
-            console.log(this.state);
-            axios.post("/api/ingredient", this.state)
-                .then(res => this.props.afterSubmit())
-                .catch(err => console.log(err))
+        const newIngredient = {
+            ...this.state,
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            date_start: `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`,
+            quantity: Number(this.state.quantity) || 1,
+            fridge_bool: this.state.fridge_bool === 'true' || this.state.fridge_bool === true
+        };
+
+        this.props.addIngredient(newIngredient);
+        this.props.afterSubmit();
+        this.setState({
+            name: "",
+            date_start: ``,
+            date_expire: "",
+            quantity: 0,
+            fridge_bool: false
         });
     }
 
